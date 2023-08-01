@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
@@ -43,7 +44,7 @@ func sineInputs() []float64 {
 
 // playLineChart continuously adds values to the LineChart, once every delay.
 // Exits when the context expires.
-func playLineChart(ctx context.Context, lc *linechart.LineChart, delay time.Duration) {
+func playLineChart(ctx context.Context, lc *linechart.MouseTrace, delay time.Duration) {
 	inputs := sineInputs()
 	ticker := time.NewTicker(delay)
 	defer ticker.Stop()
@@ -82,7 +83,7 @@ func main() {
 
 	const redrawInterval = 250 * time.Millisecond
 	ctx, cancel := context.WithCancel(context.Background())
-	lc, err := linechart.New(
+	lc, err := linechart.NewMouseTrace(
 		linechart.AxesCellOpts(cell.FgColor(cell.ColorRed)),
 		linechart.YLabelCellOpts(cell.FgColor(cell.ColorGreen)),
 		linechart.XLabelCellOpts(cell.FgColor(cell.ColorCyan)),
@@ -108,6 +109,6 @@ func main() {
 	}
 
 	if err := termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quitter), termdash.RedrawInterval(redrawInterval)); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }

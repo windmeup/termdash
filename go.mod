@@ -17,3 +17,7 @@ require (
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.5.0 // indirect
 )
+
+replace (
+	github.com/mum4k/termdash => ./
+)
