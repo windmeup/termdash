@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 	"time"
 
 	"github.com/mum4k/termdash"
@@ -46,6 +47,10 @@ func sineInputs() []float64 {
 // Exits when the context expires.
 func playLineChart(ctx context.Context, lc *linechart.MouseTrace, delay time.Duration) {
 	inputs := sineInputs()
+	xLabels := make(map[int]string)
+	for i := range inputs {
+		xLabels[i] = strconv.Itoa(i)
+	}
 	ticker := time.NewTicker(delay)
 	defer ticker.Stop()
 	for i := 0; ; {
@@ -55,9 +60,7 @@ func playLineChart(ctx context.Context, lc *linechart.MouseTrace, delay time.Dur
 			rotated := append(inputs[i:], inputs[:i]...)
 			if err := lc.Series("first", rotated,
 				linechart.SeriesCellOpts(cell.FgColor(cell.ColorNumber(33))),
-				linechart.SeriesXLabels(map[int]string{
-					0: "zero",
-				}),
+				linechart.SeriesXLabels(xLabels),
 			); err != nil {
 				panic(err)
 			}

@@ -121,7 +121,11 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) err
 			mv += fmt.Sprintf(" %s: %f", name, values.values[idx])
 		}
 	}
-	lc.mouseValue = fmt.Sprintf("%s:%s", label, mv)
+	if mv == "" {
+		lc.mouseValue = ""
+	} else {
+		lc.mouseValue = fmt.Sprintf("%s:%s", label, mv)
+	}
 	if lc.mousePoint == nil {
 		lc.mousePoint = &image.Point{
 			X: m.Position.X,
