@@ -16,6 +16,7 @@ type MouseTrace struct {
 	*LineChart
 
 	mousePoint *image.Point
+	mouseValue string
 }
 
 func NewMouseTrace(opts ...Option) (*MouseTrace, error) {
@@ -24,8 +25,7 @@ func NewMouseTrace(opts ...Option) (*MouseTrace, error) {
 		return nil, err
 	}
 	return &MouseTrace{
-		LineChart:  lc,
-		mousePoint: &image.Point{X: 10, Y: 10}, // TODO test
+		LineChart: lc,
 	}, nil
 }
 
@@ -51,17 +51,20 @@ func (lc *MouseTrace) Draw(cvs *canvas.Canvas, meta *widgetapi.Meta) error {
 		return err
 	}
 
-	if err := lc.drawMouse(cvs, adjXD, yd); err != nil {
+	if err := lc.drawMouse(cvs, yd); err != nil {
 		return err
 	}
 
 	if err := lc.drawAxes(cvs, adjXD, yd); err != nil {
 		return err
 	}
+	if err := lc.drawMouseDetail(cvs, yd); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (lc *MouseTrace) drawMouse(cvs *canvas.Canvas, xd *axes.XDetails, yd *axes.YDetails) error {
+func (lc *MouseTrace) drawMouse(cvs *canvas.Canvas, yd *axes.YDetails) error {
 	if lc.mousePoint == nil {
 		return nil
 	}
@@ -69,6 +72,14 @@ func (lc *MouseTrace) drawMouse(cvs *canvas.Canvas, xd *axes.XDetails, yd *axes.
 		{Start: image.Point{X: lc.mousePoint.X, Y: yd.Start.Y}, End: image.Point{X: lc.mousePoint.X, Y: yd.End.Y}},
 	}, draw.HVLineCellOpts(cell.FgColor(cell.ColorGray))); err != nil {
 		return fmt.Errorf("failed to draw mouse: %w", err)
+	}
+	return nil
+}
+
+func (lc *MouseTrace) drawMouseDetail(cvs *canvas.Canvas, yd *axes.YDetails) error {
+	pos := yd.Start.Add(image.Point{X: 2, Y: 0})
+	if err := draw.Text(cvs, lc.mouseValue, pos, draw.TextCellOpts(cell.FgColor(cell.ColorWhite))); err != nil {
+		return err
 	}
 	return nil
 }
@@ -85,8 +96,32 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) err
 	}
 	if !m.Position.In(lc.zoom.GraphArea()) {
 		lc.mousePoint = nil
+		lc.mouseValue = ""
 		return nil
 	}
+	xdZoomed := lc.zoom.Zoom()
+	v, err := xdZoomed.Scale.PixelToValue(m.Position.X)
+	if err != nil {
+		return err
+	}
+	idx := (int)(v)
+	if idx < 0 {
+		idx = 0
+	}
+	var label, mv string
+	for name, values := range lc.series {
+		if idx < len(values.values) {
+			if label == "" {
+				if values.xLabelsSet {
+					if l := values.xLabels[idx]; l != "" {
+						label = l
+					}
+				}
+			}
+			mv += fmt.Sprintf(" %s: %f", name, values.values[idx])
+		}
+	}
+	lc.mouseValue = fmt.Sprintf("%s:%s", label, mv)
 	if lc.mousePoint == nil {
 		lc.mousePoint = &image.Point{
 			X: m.Position.X,
