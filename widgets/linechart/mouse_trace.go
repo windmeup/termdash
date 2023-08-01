@@ -10,6 +10,7 @@ import (
 	"github.com/mum4k/termdash/widgetapi"
 	"github.com/mum4k/termdash/widgets/linechart/internal/axes"
 	"image"
+	"math"
 )
 
 type MouseTrace struct {
@@ -94,17 +95,18 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) err
 	if err := lc.zoom.Mouse(m); err != nil {
 		return err
 	}
-	if !m.Position.In(lc.zoom.GraphArea()) {
+	graphArea := lc.zoom.GraphArea()
+	if !m.Position.In(graphArea) {
 		lc.mousePoint = nil
 		lc.mouseValue = ""
 		return nil
 	}
 	xdZoomed := lc.zoom.Zoom()
-	v, err := xdZoomed.Scale.PixelToValue(m.Position.X)
+	v, err := xdZoomed.Scale.PixelToValue(m.Position.X - graphArea.Min.X)
 	if err != nil {
 		return err
 	}
-	idx := (int)(v)
+	idx := (int)(math.Round(v * 2)) // TODO wrong when zoomed
 	if idx < 0 {
 		idx = 0
 	}
