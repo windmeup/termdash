@@ -59,7 +59,7 @@ func (lc *MouseTrace) Draw(cvs *canvas.Canvas, _ *widgetapi.Meta) error {
 	if err := lc.drawAxes(cvs, adjXD, yd); err != nil {
 		return err
 	}
-	if err := lc.drawMouseDetail(cvs, yd); err != nil {
+	if err := lc.drawMouseValue(cvs, yd); err != nil {
 		return err
 	}
 	return nil
@@ -77,7 +77,7 @@ func (lc *MouseTrace) drawMouse(cvs *canvas.Canvas, yd *axes.YDetails) error {
 	return nil
 }
 
-func (lc *MouseTrace) drawMouseDetail(cvs *canvas.Canvas, yd *axes.YDetails) error {
+func (lc *MouseTrace) drawMouseValue(cvs *canvas.Canvas, yd *axes.YDetails) error {
 	pos := yd.Start.Add(image.Point{X: 2, Y: 0})
 	if err := draw.Text(cvs, lc.mouseValue, pos, draw.TextCellOpts(cell.FgColor(cell.ColorWhite))); err != nil {
 		return err
