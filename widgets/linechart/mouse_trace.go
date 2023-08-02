@@ -106,7 +106,7 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) err
 	if err != nil {
 		return err
 	}
-	idx := (int)(math.Round(v * 2)) // TODO wrong when zoomed
+	idx := (int)(math.Round(v*2)) - (int)(xdZoomed.Scale.Min.Rounded) // tricky
 	if idx < 0 {
 		idx = 0
 	}
