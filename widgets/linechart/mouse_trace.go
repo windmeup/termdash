@@ -30,7 +30,7 @@ func NewMouseTrace(opts ...Option) (*MouseTrace, error) {
 	}, nil
 }
 
-func (lc *MouseTrace) Draw(cvs *canvas.Canvas, meta *widgetapi.Meta) error {
+func (lc *MouseTrace) Draw(cvs *canvas.Canvas, _ *widgetapi.Meta) error {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -85,7 +85,7 @@ func (lc *MouseTrace) drawMouseDetail(cvs *canvas.Canvas, yd *axes.YDetails) err
 	return nil
 }
 
-func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) error {
+func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -106,7 +106,7 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) err
 	if err != nil {
 		return err
 	}
-	idx := (int)(math.Round(v*2)) - (int)(xdZoomed.Scale.Min.Rounded) // tricky
+	idx := int(math.Round(v*2)) - int(xdZoomed.Scale.Min.Rounded) // tricky
 	if idx < 0 {
 		idx = 0
 	}
@@ -120,7 +120,7 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, meta *widgetapi.EventMeta) err
 					}
 				}
 			}
-			mv += fmt.Sprintf(" %s: %f", name, values.values[idx])
+			mv += fmt.Sprintf(" %s: %.2f", name, values.values[idx]) // TODO format option
 		}
 	}
 	if mv == "" {
