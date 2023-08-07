@@ -113,9 +113,6 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error 
 	if idx < 0 {
 		idx = 0
 	}
-	if m.Button == mouse.ButtonLeft && idx < len(lc.series) {
-		lc.mouseIdx = idx
-	}
 	var label, mv string
 	for name, values := range lc.series {
 		if idx < len(values.values) {
@@ -124,6 +121,9 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error 
 					if l := values.xLabels[idx]; l != "" {
 						label = l
 					}
+				}
+				if m.Button == mouse.ButtonLeft {
+					lc.mouseIdx = idx
 				}
 			}
 			mv += fmt.Sprintf(" %s: %.2f", name, values.values[idx]) // TODO format option
