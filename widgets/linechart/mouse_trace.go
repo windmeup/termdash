@@ -12,6 +12,8 @@ import (
 	"github.com/mum4k/termdash/widgets/linechart/internal/axes"
 	"image"
 	"math"
+	"sort"
+	"strings"
 )
 
 type MouseTrace struct {
@@ -113,7 +115,12 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error 
 	if idx < 0 {
 		idx = 0
 	}
-	var label, mv string
+	var label string
+	type sV struct {
+		name  string
+		value float64
+	}
+	var mVs []sV
 	for name, values := range lc.series {
 		if idx < len(values.values) {
 			if label == "" {
@@ -126,12 +133,19 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error 
 					lc.mouseIdx = idx
 				}
 			}
-			mv += fmt.Sprintf(" %s: %.2f", name, values.values[idx]) // TODO format option
+			mVs = append(mVs, sV{name: name, value: values.values[idx]})
 		}
 	}
-	if mv == "" {
+	if mVs == nil {
 		lc.mouseValue = ""
 	} else {
+		sort.Slice(mVs, func(i, j int) bool {
+			return strings.Compare(mVs[i].name, mVs[j].name) < 0
+		})
+		var mv string
+		for _, v := range mVs {
+			mv += fmt.Sprintf(" %s: %.2f", v.name, v.value) // TODO format option
+		}
 		lc.mouseValue = fmt.Sprintf("%s:%s", label, mv)
 	}
 	if lc.mousePoint == nil {
