@@ -3,6 +3,7 @@ package linechart
 import (
 	"fmt"
 	"github.com/mum4k/termdash/cell"
+	"github.com/mum4k/termdash/mouse"
 	"github.com/mum4k/termdash/private/area"
 	"github.com/mum4k/termdash/private/canvas"
 	"github.com/mum4k/termdash/private/draw"
@@ -18,6 +19,8 @@ type MouseTrace struct {
 
 	mousePoint *image.Point
 	mouseValue string
+
+	mouseIdx int
 }
 
 func NewMouseTrace(opts ...Option) (*MouseTrace, error) {
@@ -110,6 +113,9 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error 
 	if idx < 0 {
 		idx = 0
 	}
+	if m.Button == mouse.ButtonLeft && idx < len(lc.series) {
+		lc.mouseIdx = idx
+	}
 	var label, mv string
 	for name, values := range lc.series {
 		if idx < len(values.values) {
@@ -136,4 +142,8 @@ func (lc *MouseTrace) Mouse(m *terminalapi.Mouse, _ *widgetapi.EventMeta) error 
 		lc.mousePoint.X = m.Position.X
 	}
 	return nil
+}
+
+func (lc *MouseTrace) MouseIndex() int {
+	return lc.mouseIdx
 }
